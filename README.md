@@ -51,7 +51,9 @@ if order.state == order.State.FILLED:
 
 To Do:
 1. Addition of Test casees
-2. Integration with a broader library like Zipline to include simulation and several brokers
+2. Support for F&O
+3. Integration with data vendors
+4. Integration with a broader library like Zipline to include simulation and several brokers
 
 Please log issues here if you find any.
 
