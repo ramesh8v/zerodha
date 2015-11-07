@@ -1,6 +1,6 @@
 # zerodha
 Automation of zerodha for HFT
-```
+```python
 from broker.module import Zerodha, Order
 auth = dict()
 auth['user_id'] = 'UDI'
@@ -50,10 +50,10 @@ if order.state == order.State.FILLED:
 ```
 
 To Do:
-1. Addition of Test casees
-2. Support for F&O
-3. Integration with data vendors
-4. Integration with a broader library like Zipline to include simulation and several brokers
+- Addition of Test casees
+- Support for F&O
+- Integration with data vendors
+- Integration with a broader library like Zipline to include simulation and several brokers
 
 Please log issues here if you find any.
 
