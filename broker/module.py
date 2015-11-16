@@ -98,10 +98,10 @@ class Zerodha(Broker):
         self.soup = BeautifulSoup(self.resp.text, 'html.parser')
         
         
-        params = dict(password='"ASDF&890"')
+        params = dict(password = self.auth['txn_password'])
         self.headers_json['Referer'] = MARKET_WATCH_URL
         self.resp = self.session.post(TXN_PASSWORD_SUBMIT_URL,
-                                    json = {"password":"ASDF&890"}, 
+                                    json = params, 
                                     headers = self.headers_json,
                                     proxies = self.proxy,
                                     verify = False)
