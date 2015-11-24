@@ -1,5 +1,5 @@
 # zerodha
-Automation of zerodha for HFT
+Automation of zerodha for HFT (currently tested with Python2.7)
 ```python
 from broker.module import Zerodha, Order
 auth = dict()
@@ -54,6 +54,7 @@ To Do:
 - Support for F&O
 - Integration with data vendors
 - Integration with a broader library like Zipline to include simulation and several brokers
+- Support for Python 3
 
 Please log issues here if you find any.
 
