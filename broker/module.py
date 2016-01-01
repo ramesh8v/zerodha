@@ -27,7 +27,10 @@ TIME_SERIES_URL = 'https://kite.zerodha.com/ohlc/%s/%s' #https://kite.zerodha.co
 ORDER_MODIFY_URL = ORDER_CANCEL_URL
 USER_AGENT_STR = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
 
-requests.packages.urllib3.disable_warnings()
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 
 # Over-ride this if necessary 
@@ -70,6 +73,16 @@ class Zerodha(Broker):
         self.proxy = prefs.get('proxy')
     def connect(self):      
         
+        self._login_step1()
+        
+        params = self._qna(self.resp.text)
+        
+        if (self._login_step2(params)):
+            return self._login_step3()
+        else:
+            return False
+    
+    def _login_step1(self):
         params = dict(user_id=self.auth['user_id'], password=self.auth['password'])
         
         self.resp = self.session.post(LOGIN_SUBMIT_URL,
@@ -77,9 +90,10 @@ class Zerodha(Broker):
                                       data = params, 
                                       headers = self.headers_normal,
                                       verify = False)
-        
+    
+    def _qna(self,txt):
         params = dict()
-        self.soup = BeautifulSoup(self.resp.text, 'html.parser')
+        self.soup = BeautifulSoup(txt, 'html.parser')
         form = self.soup.find_all('form')[0]
         hidden_ips = form.find_all(attrs={'type': 'hidden'})
         for hidden_ip in hidden_ips:
@@ -89,25 +103,29 @@ class Zerodha(Broker):
         key = str(form.find_all('span')[1].contents[0])
         params['answer2'] = self.auth[key]
         params['questions'] = ''
+        return params
+    
+    def _login_step2(self, params):
         self.resp = self.session.post(LOGIN_SUBMIT_URL,
                                       proxies = self.proxy,
                                       data = params, 
                                       headers = self.headers_normal,
                                       verify = False)
-
         self.soup = BeautifulSoup(self.resp.text, 'html.parser')
-        
-        
-        params = dict(password='"ASDF&890"')
+        return self._check_step2()
+    
+    def _check_step2(self):
+        return (self.resp.text.find('Positions')) > 0 
+    
+    def _login_step3(self):
         self.headers_json['Referer'] = MARKET_WATCH_URL
         self.resp = self.session.post(TXN_PASSWORD_SUBMIT_URL,
-                                    json = {"password":"ASDF&890"}, 
+                                    json = {"password":self.auth['txn_password']}, 
                                     headers = self.headers_json,
                                     proxies = self.proxy,
                                     verify = False)
         return json.loads(self.resp.text)['data'] == True
-        
-
+    
     def place_order(self, order):
         param = {
                 'disclosed_quantity': 0, 
