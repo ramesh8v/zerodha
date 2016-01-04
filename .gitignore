@@ -7,3 +7,7 @@ nsepy/nselist.py
 nsepy/__init__.py
 main.py
 test_z.py
+login_test.py
+*.pyc
+*.h5
+*.pyc
