@@ -9,7 +9,11 @@ import datetime
 from decimal import *
 import json
 from broker import Broker, Order
-
+try:
+    import pandas as pd
+except:
+    pass
+import six
 LOGIN_URL = 'https://kite.zerodha.com/'
 BASE_REFERER = LOGIN_URL
 CHART_REFERER = 'https://kite.zerodha.com/advanced-chart'
@@ -474,6 +478,11 @@ class Zerodha(Broker):
         self.__get_market_watch()
 
     def get_time_series(self, stock, frequency = 'day'):
+        try:
+            self._add_to_market_watch(stock)
+        except:
+            pass
+        
         self.get_watch_list();
         stock_id = None
         stock = stock.replace('-EQ','')
@@ -483,13 +492,24 @@ class Zerodha(Broker):
                 break
         
         url = TIME_SERIES_URL%(stock_token, frequency)
+        
       
         self.resp = self.session.get(url,
                                      headers = self.headers_normal,
                                      verify = False)
     
-        return self.resp.text
-                
+        txt = self.resp.text
+        txt = 'Time,Open,High,Low,Close,Volume,Unknown' + txt
+        txt = txt.replace('2014-','\n2014-')
+        txt = txt.replace('2015-','\n2015-')
+        txt = txt.replace('2016-','\n2016-')
+        try:
+            df = pd.read_csv(six.StringIO(unicode(txt)), parse_dates = [0])
+            
+            del df['Unknown']
+            return df.set_index('Time')
+        except:
+            return txt
             
     
     def _add_to_market_watch(self, security):
